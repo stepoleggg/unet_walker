@@ -4,9 +4,9 @@ from data import *
 # доступные классы
 # 'ground', 'tree', 'bush', 'tower', 'wire', 'copter', 'car', 'build'
 # для каких классов была обучена?
-channels = ['wires']
+channels = ['wires', 'copter']
 
-model = unet(len(channels), pretrained_weights = 'unet_walker_wires.hdf5')
+model = unet(len(channels), pretrained_weights = 'wires_copter.hdf5')
 
 testGene = testGenerator("data/walker/train/image/","data/walker/predict/")
 

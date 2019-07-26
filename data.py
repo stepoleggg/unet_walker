@@ -123,5 +123,5 @@ def saveResult(save_path,npyfile,channels):
         img = color(item, channels)
 
         #img = item[:,:,0]
-        print(img)
+        #print(img)
         io.imsave(os.path.join(save_path,"%d_predict.png"%i),img)
