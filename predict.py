@@ -6,8 +6,7 @@ from data import *
 # для каких классов была обучена?
 channels = ['wires']
 
-model = unet(len(channels), pretrained_weights = 'unet_walker3.hdf5')
-model_checkpoint = ModelCheckpoint('unet_walker_wires.hdf5', monitor='loss',verbose=1, save_best_only=True)
+model = unet(len(channels), pretrained_weights = 'unet_walker_wires.hdf5')
 
 testGene = testGenerator("data/walker/train/image/","data/walker/predict/")
 
