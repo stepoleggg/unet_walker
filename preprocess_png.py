@@ -24,53 +24,55 @@ from albumentations import (
 
 resolution = (256, 256)
 
-def gen(path='data/train/', batch=2):
+def gen(path='data/train', batch=2):
+
     seed(42)
     images = []
-    for directory in os.listdir(path):
-        d = f'{path}{directory}' 
-        for file in os.listdir(f'{d}/left/'):
-            images.append((f'{d}/left/{file}', f'{d}/depth/{file}'))
+     
+    for file in os.listdir(f'{path}/left/'):
+        images.append((f'{path}/left/{file}', f'{path}/depth/{file}', f'{path}/mask/{file}'))
+        
     shuffle(images)
     #x = 0
     while True:
         output = []
         
         for _ in range(batch):
-            img, depth = choice(images)
+            img, depth, mask = choice(images)
             """
             save_img = img.split('/')[-1]
             save_depth = depth.split('/')[-1]
             copyfile(depth,f'{path}save/depth_4_mask/{x}_{save_depth}')
             copyfile(img,f'{path}save/left_4_mask/{x}_{save_img}')
             """
-            img, depth = cv2.imread(img), cv2.imread(depth)
+            img, depth, mask = cv2.imread(img), cv2.imread(depth), cv2.imread(mask)
             aug1 = Compose([
                 RandomCrop(height=resolution[0], width=resolution[1], p=1.0),
                 VerticalFlip(p=0.5),
                 RandomRotate90(p=0.5),
                 OpticalDistortion(p=0.8, distort_limit=0.2, shift_limit=0.2)],
                 additional_targets={
-                    'depth': 'image'
+                    'depth': 'image',
+                    'mask': 'image'
                 })(image = img,
                 depth = depth)
             aug2 = Compose([
                 CLAHE(p=0.8),
                 RandomBrightnessContrast(p=0.8),
                 RandomGamma(p=0.8)])(image = aug1["image"])
-            output.append((aug2["image"], aug1["depth"]))
+            output.append((aug2["image"], aug1["depth"], aug1["mask"]))
             #x += 1
 
         yield output
-"""
+
 for imgs in gen():
     cv2.imshow('img0',imgs[0][0])
     cv2.imshow('img1',imgs[1][0])
     cv2.imshow('depth0',imgs[0][1])
     cv2.imshow('depth1',imgs[1][1])
     cv2.waitKey()
-"""
-def image_to_probs(img):
+
+def image_to_probs(img: np.ndarray) -> list:
     """
     На вход подается изображение (720,1280,3), оно делиться на равные прямоугольники (256,256,3)
     На выходе list прямоугольников
@@ -88,7 +90,7 @@ def image_to_probs(img):
 
     return out
 
-def probs_to_image(imgs):
+def probs_to_image(imgs: list) -> np.ndarray:
     """
     Собирает изображение из прямоугольников (256,256,3), на вход подается list прямоугольников
     Проход идет слева на право

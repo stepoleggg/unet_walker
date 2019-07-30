@@ -17,7 +17,7 @@ cars = [255,0,255]
 buildings = [255,255,0]
 
 COLOR_DICT = dict(ground = ground, trees = trees, bush = bush, towers = towers, wires = wires, copter = copter, cars = cars, buildings = buildings)
-#print(COLOR_DICT)
+
 
 def adjustData(img,mask,flag_multi_class,channels):
     if(flag_multi_class):
