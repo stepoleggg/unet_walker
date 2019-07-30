@@ -24,7 +24,7 @@ from albumentations import (
 
 resolution = (256, 256)
 
-def gen(path='data/', batch=2):
+def gen(path='data/train/', batch=2):
     seed(42)
     images = []
     for directory in os.listdir(path):
@@ -36,7 +36,7 @@ def gen(path='data/', batch=2):
     while True:
         output = []
         
-        for i in range(batch):
+        for _ in range(batch):
             img, depth = choice(images)
             """
             save_img = img.split('/')[-1]
@@ -62,10 +62,46 @@ def gen(path='data/', batch=2):
             #x += 1
 
         yield output
-
+"""
 for imgs in gen():
     cv2.imshow('img0',imgs[0][0])
     cv2.imshow('img1',imgs[1][0])
     cv2.imshow('depth0',imgs[0][1])
     cv2.imshow('depth1',imgs[1][1])
     cv2.waitKey()
+"""
+def image_to_probs(img):
+    """
+    На вход подается изображение (720,1280,3), оно делиться на равные прямоугольники (256,256,3)
+    На выходе list прямоугольников
+    Проход по изображению идет слева на право
+    """
+    out = []
+
+    for i in range(0,3):
+        for j in range(0,5):
+            if i==2:
+                new_image = img[i*256-48:(i+1)*256-48,j*256:(j+1)*256,:] # сдвиг, чтобы сохранить размер (720,1280,3) при сборке
+            else:
+                new_image = img[i*256:(i+1)*256,j*256:(j+1)*256,:]
+            out.append(new_image)
+
+    return out
+
+def probs_to_image(imgs):
+    """
+    Собирает изображение из прямоугольников (256,256,3), на вход подается list прямоугольников
+    Проход идет слева на право
+    """
+    new_image = np.zeros((720, 1280, 3,))
+    k = 0
+    for i in range(0,3):
+        for j in range(0,5):
+            img = imgs[k]
+            if i==2:
+                new_image[i*256-48:(i+1)*256-48,j*256:(j+1)*256,:] = img[:,:,:]
+            else:
+                new_image[i*256:(i+1)*256,j*256:(j+1)*256,:] = img[:,:,:]
+            k+=1
+            
+    return new_image
