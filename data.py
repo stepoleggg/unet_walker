@@ -99,6 +99,7 @@ def color(item, channels):
 
 def saveResult(save_path,npyfile,channels):
     for i,item in enumerate(npyfile):
+        print(item)
         img = color(item, channels)
 
         #img = item[:,:,0]

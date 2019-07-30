@@ -12,12 +12,16 @@ data_gen_args = dict(rotation_range=0.2,
 # доступные классы
 # 'ground', 'tree', 'bush', 'tower', 'wire', 'copter', 'car', 'build'
 channels = ['wires','copter']
-weights_path = ''
+#претренированные веса:
+pretrained_weights_path = ''
+#сохранить в веса:
+weights_path = 'weights/wires_copter_256.hdf5'
+
 train_path = 'data/train/'
 
 myGene = trainGenerator(2, train_path, 'left', 'depth', 'mask', channels, data_gen_args, save_to_dir = None)
 
-model = unet(len(channels), pretrained_weights = weights_path)
+model = unet(len(channels), pretrained_weights = pretrained_weights_path)
 
 model_checkpoint = ModelCheckpoint(weights_path, monitor='loss',verbose=1, save_best_only=True)
 model.fit_generator(myGene,steps_per_epoch=20,epochs=10,callbacks=[model_checkpoint])

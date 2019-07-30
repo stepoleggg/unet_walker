@@ -5,8 +5,8 @@ from data import *
 # 'ground', 'tree', 'bush', 'tower', 'wire', 'copter', 'car', 'build'
 # для каких классов была обучена?
 channels = ['wires', 'copter']
-weights_path = 'weights/wires_copter.hdf5'
-test_path = 'data/test/'
+weights_path = 'weights/wires_copter_256.hdf5'
+test_path = 'data/test/left'
 predict_path = 'data/predict/'
 
 model = unet(len(channels), pretrained_weights = weights_path)
