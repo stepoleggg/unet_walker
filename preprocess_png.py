@@ -1,6 +1,6 @@
 import os
 import numpy as np
-import cv2
+import skimage.io as io
 from shutil import copyfile
 from random import choice, shuffle, seed
 from albumentations import (
@@ -45,7 +45,8 @@ def gen(path='data/train', batch=2):
             copyfile(depth,f'{path}save/depth_4_mask/{x}_{save_depth}')
             copyfile(img,f'{path}save/left_4_mask/{x}_{save_img}')
             """
-            img, depth, mask = cv2.imread(img), cv2.imread(depth), cv2.imread(mask)
+            img, depth, mask = io.imread(img), io.imread(depth), io.imread(mask)
+            img, depth, mask = img[:,:,0:3], depth[:,:,0:3], mask[:,:,0:3]
             #print("before:")
             #print(np.unique(mask, axis=-2))
             aug1 = Compose([

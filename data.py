@@ -6,14 +6,14 @@ import glob
 import skimage.io as io
 import skimage.transform as trans
 from scipy import ndimage, misc
-from preprocess_png import gen
+from preprocess_png import gen, image_to_probs, probs_to_image
 import cv2
 
 ground = [0,0,0]
 trees = [0,255,0]
 bush = [0,255,255]
 towers = [0,0,255]
-wires = [255,0,0]
+wires = [0,0,255]
 copter = [255,255,255]
 cars = [255,0,255]
 buildings = [255,255,0]
@@ -56,7 +56,7 @@ def trainGenerator(batch_size,train_path,image_folder,depth_folder,mask_folder,c
         mask_0 = img1[2]
         mask_1 = img2[2]
         #print("after:")
-        #print(np.unique(mask_0, axis=2))
+        #print(np.unique(mask_0, axis=0))
         img = np.array((img_0, img_1))
         mask = np.array((mask_0, mask_1))
         img,mask = adjustData(img,mask,flag_multi_class,channels)
@@ -69,13 +69,14 @@ def testGenerator(test_path,save_path,num_image = 20,target_size = (256,256),fla
     for file in os.listdir(test_path):
         img = io.imread(os.path.join(test_path,file))
         img = img / 255
-        i+=1
-        img = trans.resize(img,target_size)
-        io.imsave(os.path.join(save_path,"%d_test.png"%i),img)
-        img = img[:,:,0:3]
-        img = np.reshape(img,(1,)+img.shape)
+        for img in image_to_probs(img):
+            i+=1
+            img = trans.resize(img,target_size)
+            #io.imsave(os.path.join(save_path,"%d_test.png"%i),img)
+            img = img[:,:,0:3]
+            img = np.reshape(img,(1,)+img.shape)
 
-        yield img
+            yield img
 
 def color(item, channels):
     img = np.zeros(item[:,:,0].shape + (3,), dtype = np.uint8)
@@ -101,10 +102,17 @@ def color(item, channels):
     return img
 
 def saveResult(save_path,npyfile,channels):
+    arr = []
+    k = 0
     for i,item in enumerate(npyfile):
         print(item)
         img = color(item, channels)
-
-        #img = item[:,:,0]
-        #print(img)
-        io.imsave(os.path.join(save_path,"%d_predict.png"%i),img)
+        arr.append(img)
+        if len(arr)==15:
+            img_save = probs_to_image(arr)
+            img_save = img_save.astype(np.uint8)
+            k+=1
+            io.imsave(os.path.join(save_path,"%d_predict.png"%k),img_save)
+            arr = []
+        
+        
