@@ -2,7 +2,7 @@ import os
 import numpy as np
 import cv2
 from shutil import copyfile
-from random import choice, shuffle
+from random import choice, shuffle, seed
 from albumentations import (
     HorizontalFlip,
     VerticalFlip,
@@ -24,25 +24,26 @@ from albumentations import (
 
 resolution = (256, 256)
 
-def gen():
-
-    path = 'data_for_train/'
+def gen(path='data/', batch=2):
+    seed(42)
     images = []
     for directory in os.listdir(path):
         d = f'{path}{directory}' 
         for file in os.listdir(f'{d}/left/'):
             images.append((f'{d}/left/{file}', f'{d}/depth/{file}'))
     shuffle(images)
-    x = 0
+    #x = 0
     while True:
         output = []
         
-        for i in range(2):
+        for i in range(batch):
             img, depth = choice(images)
+            """
             save_img = img.split('/')[-1]
             save_depth = depth.split('/')[-1]
-            copyfile(depth,f'save/depth_4_mask/{x}_{save_depth}')
-            copyfile(img,f'save/left_4_mask/{x}_{save_img}')
+            copyfile(depth,f'{path}save/depth_4_mask/{x}_{save_depth}')
+            copyfile(img,f'{path}save/left_4_mask/{x}_{save_img}')
+            """
             img, depth = cv2.imread(img), cv2.imread(depth)
             aug1 = Compose([
                 RandomCrop(height=resolution[0], width=resolution[1], p=1.0),
@@ -58,7 +59,7 @@ def gen():
                 RandomBrightnessContrast(p=0.8),
                 RandomGamma(p=0.8)])(image = aug1["image"])
             output.append((aug2["image"], aug1["depth"]))
-            x += 1
+            #x += 1
 
         yield output
 
