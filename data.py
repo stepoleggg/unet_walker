@@ -7,12 +7,13 @@ import skimage.io as io
 import skimage.transform as trans
 from scipy import ndimage, misc
 from preprocess_png import gen
+import cv2
 
 ground = [0,0,0]
 trees = [0,255,0]
 bush = [0,255,255]
 towers = [0,0,255]
-wires = [0,0,255]
+wires = [255,0,0]
 copter = [255,255,255]
 cars = [255,0,255]
 buildings = [255,255,0]
@@ -54,6 +55,8 @@ def trainGenerator(batch_size,train_path,image_folder,depth_folder,mask_folder,c
         img_1 = img2[0]
         mask_0 = img1[2]
         mask_1 = img2[2]
+        #print("after:")
+        #print(np.unique(mask_0, axis=2))
         img = np.array((img_0, img_1))
         mask = np.array((mask_0, mask_1))
         img,mask = adjustData(img,mask,flag_multi_class,channels)

@@ -46,6 +46,8 @@ def gen(path='data/train', batch=2):
             copyfile(img,f'{path}save/left_4_mask/{x}_{save_img}')
             """
             img, depth, mask = cv2.imread(img), cv2.imread(depth), cv2.imread(mask)
+            #print("before:")
+            #print(np.unique(mask, axis=-2))
             aug1 = Compose([
                 RandomCrop(height=resolution[0], width=resolution[1], p=1.0),
                 VerticalFlip(p=0.5),
