@@ -48,10 +48,15 @@ def trainGenerator(batch_size,train_path,image_folder,depth_folder,mask_folder,c
                     flag_multi_class = True,save_to_dir = None,target_size = (256,256),seed = 1):
         
     train_generator = gen()
-    for (img, _,mask) in train_generator:
+    for (img1, img2) in train_generator:
+        
+        img_0 = img1[0]
+        img_1 = img2[0]
+        mask_0 = img1[2]
+        mask_1 = img2[2]
+        img = np.array((img_0, img_1))
+        mask = np.array((mask_0, mask_1))
         img,mask = adjustData(img,mask,flag_multi_class,channels)
-        #print(img.shape)
-        #print(mask.shape)
         yield (img,mask)
 
 
