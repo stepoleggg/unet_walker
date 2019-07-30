@@ -55,7 +55,8 @@ def gen(path='data/train', batch=2):
                     'depth': 'image',
                     'mask': 'image'
                 })(image = img,
-                depth = depth)
+                depth = depth,
+                mask = mask)
             aug2 = Compose([
                 CLAHE(p=0.8),
                 RandomBrightnessContrast(p=0.8),
@@ -64,14 +65,16 @@ def gen(path='data/train', batch=2):
             #x += 1
 
         yield output
-
+"""
 for imgs in gen():
     cv2.imshow('img0',imgs[0][0])
     cv2.imshow('img1',imgs[1][0])
     cv2.imshow('depth0',imgs[0][1])
     cv2.imshow('depth1',imgs[1][1])
+    cv2.imshow('mask0',imgs[0][2])
+    cv2.imshow('mask1',imgs[1][2])
     cv2.waitKey()
-
+"""
 def image_to_probs(img: np.ndarray) -> list:
     """
     На вход подается изображение (720,1280,3), оно делиться на равные прямоугольники (256,256,3)
