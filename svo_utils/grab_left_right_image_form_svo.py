@@ -1,14 +1,9 @@
-import sys
+
 import pyzed.sl as sl
 import os
 
-def main():
+def main(filepath):
 
-    if len(sys.argv) != 2:
-        print("Please specify path to .svo file.")
-        exit()
-
-    filepath = sys.argv[1]
     print("Reading SVO file: {0}".format(filepath))
 
     init = sl.InitParameters(svo_input_filename=filepath, svo_real_time_mode=False)
@@ -43,4 +38,8 @@ def main():
     print("\nFINISH")
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) != 2:
+        print("Please specify path to .svo file.")
+        exit()
+    main(sys.argv[1])

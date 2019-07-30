@@ -1,17 +1,11 @@
 """
 Read svo file and create png depth and pcd point cloud
 """
-import sys
 import pyzed.sl as sl
 import os
 
-def main():
-    
-    if len(sys.argv) != 2:
-        print("Please specify path to .svo file.")
-        exit()
+def main(filepath):
 
-    filepath = sys.argv[1]
     print("Reading SVO file: {0}".format(filepath))
 
     init = sl.InitParameters(svo_input_filename=filepath, svo_real_time_mode=False)
@@ -42,12 +36,14 @@ def main():
         i+=1
     print('Depth saved')
 
-    saving_point_cloud(cam, path)
+    d = saving_point_cloud(cam, path)
 
     cam.close()
 
     print(f'FINISHED, all result in dir {path}')
 
+    return d
+    
 def saving_image(mat, i, filepath):
     """
     Saving depth as png image
@@ -72,7 +68,12 @@ def saving_point_cloud(cam, filepath):
                                     sl.POINT_CLOUD_FORMAT.
                                     POINT_CLOUD_FORMAT_PCD_ASCII,
                                     filepath, True)
+    return filepath
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) != 2:
+        print("Please specify path to .svo file.")
+        exit()
+    main(sys.argv[1])
