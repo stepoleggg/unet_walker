@@ -1,5 +1,5 @@
-from model import *
-from data import *
+from model import unet
+from data import testGenerator, saveResult
 
 # доступные классы
 # 'ground', 'tree', 'bush', 'tower', 'wire', 'copter', 'car', 'build'

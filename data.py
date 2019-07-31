@@ -1,13 +1,8 @@
-from __future__ import print_function
-from keras.preprocessing.image import ImageDataGenerator
 import numpy as np 
 import os
-import glob
 import skimage.io as io
 import skimage.transform as trans
-from scipy import ndimage, misc
 from preprocess_png import gen, image_to_probs, probs_to_image
-import cv2
 
 ground = [0,0,0]
 trees = [0,255,0]
@@ -45,9 +40,7 @@ def adjustData(img,mask,flag_multi_class,channels):
 
 
 
-def trainGenerator(batch_size,train_path,image_folder,depth_folder,mask_folder,channels,aug_dict,image_color_mode = "rgb",
-                    mask_color_mode = "rgb",image_save_prefix  = "image",mask_save_prefix  = "mask",
-                    flag_multi_class = True,save_to_dir = None,target_size = (256,256),seed = 1):
+def trainGenerator(channels, flag_multi_class=True):
         
     train_generator = gen()
     for (img1, img2) in train_generator:
@@ -56,8 +49,6 @@ def trainGenerator(batch_size,train_path,image_folder,depth_folder,mask_folder,c
         img_1 = img2[0]
         mask_0 = img1[2]
         mask_1 = img2[2]
-        #print("after:")
-        #print(np.unique(mask_0, axis=0))
         img = np.array((img_0, img_1))
         mask = np.array((mask_0, mask_1))
         img,mask = adjustData(img,mask,flag_multi_class,channels)
