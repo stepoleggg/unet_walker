@@ -11,7 +11,7 @@ predict_path = 'data/predict/mask'
 num = 9
 model = unet(len(channels), pretrained_weights = weights_path)
 
-testGene = testGenerator(test_path, predict_path)
+testGene = testGenerator(test_path)
 
 results = model.predict_generator(testGene, num*15, verbose=1)
 saveResult(predict_path, results, channels)
