@@ -10,12 +10,12 @@ data_gen_args = dict(rotation_range=0.2,
                     fill_mode='nearest')
 
 # доступные классы
-# 'ground', 'tree', 'bush', 'tower', 'wire', 'copter', 'car', 'build'
-channels = ['copter', 'wire']
+# 'ground', 'tree', 'bush', 'tower', 'wires', 'copter', 'car', 'build'
+channels = ['wires']
 #претренированные веса:
-pretrained_weights_path = ''
+pretrained_weights_path = 'weights/wires_256_4.hdf5'
 #сохранить в веса:
-weights_path = 'weights/wire_copter_256_2.hdf5'
+weights_path = 'weights/wires_256_4.hdf5'
 
 train_path = 'data/train/'
 
@@ -24,4 +24,4 @@ myGene = trainGenerator(2, train_path, 'left', 'depth', 'mask', channels, data_g
 model = unet(len(channels), pretrained_weights = pretrained_weights_path)
 
 model_checkpoint = ModelCheckpoint(weights_path, monitor='loss',verbose=1, save_best_only=True)
-model.fit_generator(myGene,steps_per_epoch=100,epochs=10,callbacks=[model_checkpoint])
+model.fit_generator(myGene,steps_per_epoch=288,epochs=1000,callbacks=[model_checkpoint])

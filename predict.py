@@ -4,11 +4,11 @@ from data import *
 # доступные классы
 # 'ground', 'tree', 'bush', 'tower', 'wire', 'copter', 'car', 'build'
 # для каких классов была обучена?
-channels = ['copter', 'wire']
-weights_path = 'weights/wire_copter_256_2.hdf5'
-test_path = 'data/test/left'
-predict_path = 'data/predict/'
-num = 2
+channels = ['wires']
+weights_path = 'weights/wires_256_4.hdf5'
+test_path = 'data/predict/left'
+predict_path = 'data/predict/mask'
+num = 6
 
 model = unet(len(channels), pretrained_weights = weights_path)
 

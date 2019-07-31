@@ -19,7 +19,8 @@ from albumentations import (
     CLAHE,
     RandomBrightnessContrast,
     RandomGamma,
-    RandomCrop
+    RandomCrop,
+    Resize
 )
 
 resolution = (256, 256)
@@ -50,10 +51,10 @@ def gen(path='data/train', batch=2):
             #print("before:")
             #print(np.unique(mask, axis=-2))
             aug1 = Compose([
-                RandomCrop(height=resolution[0], width=resolution[1], p=1.0),
-                VerticalFlip(p=0.5),
-                RandomRotate90(p=0.5),
-                OpticalDistortion(p=0.8, distort_limit=0.2, shift_limit=0.2)],
+                RandomCrop(height=resolution[0], width=resolution[1], p=1.0)], #добавил ]
+                #VerticalFlip(p=0.5),
+                #RandomRotate90(p=0.5),
+                #OpticalDistortion(p=0.8, distort_limit=0.2, shift_limit=0.2)],
                 additional_targets={
                     'depth': 'image',
                     'mask': 'image'
@@ -62,7 +63,7 @@ def gen(path='data/train', batch=2):
                 mask = mask)
             aug2 = Compose([
                 CLAHE(p=0.8),
-                RandomBrightnessContrast(p=0.8),
+                #RandomBrightnessContrast(p=0.8),
                 RandomGamma(p=0.8)])(image = aug1["image"])
             output.append((aug2["image"], aug1["depth"], aug1["mask"]))
             #x += 1

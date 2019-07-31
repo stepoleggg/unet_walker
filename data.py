@@ -34,6 +34,7 @@ def adjustData(img,mask,flag_multi_class,channels):
                         new_mask[b][y][x][ch] = 1 if mask[b][y][x][0] == COLOR_DICT[channel][0] and mask[b][y][x][1] == COLOR_DICT[channel][1] and mask[b][y][x][2] == COLOR_DICT[channel][2] else 0
             ch += 1
         mask = new_mask
+        #print(mask.shape)
         #print(np.amax(mask), np.amin(mask))
     elif(np.max(img) > 1):
         img = img / 255
@@ -105,7 +106,7 @@ def saveResult(save_path,npyfile,channels):
     arr = []
     k = 0
     for i,item in enumerate(npyfile):
-        print(item)
+        #print(item)
         img = color(item, channels)
         arr.append(img)
         if len(arr)==15:
