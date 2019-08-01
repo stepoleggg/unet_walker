@@ -6,7 +6,7 @@ from preprocess_png import gen, image_to_probs, probs_to_image
 
 ground = [0,0,0]
 trees = [0,255,0]
-bush = [0,255,255]
+bush = [0,255,0]
 towers = [0,0,255]
 wires = [0,0,255]
 copter = [255,255,255]

@@ -4,8 +4,8 @@ from data import testGenerator, saveResult
 # доступные классы
 # 'ground', 'tree', 'bush', 'tower', 'wire', 'copter', 'car', 'build'
 # для каких классов была обучена?
-channels = ['wires']
-weights_path = 'weights/wires_256_4.hdf5'
+channels = ['wires', 'copter', 'bush']
+weights_path = 'weights/wires_copter_bush.hdf5'
 test_path = 'data/predict/left'
 predict_path = 'data/predict/mask'
 num = 9
