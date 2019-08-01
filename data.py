@@ -71,26 +71,11 @@ def color(item, channels):
     """
     Закрашивает пиксели в завесимости от класса и значения вероятности класса
     """
-    img = np.zeros(item[:,:,0].shape + (3,), dtype = np.uint8)
-    for y in range(len(img)):
-        for x in range(len(img[y])):
-            m_ch_v = np.max(item[y][x])
-            m_ch_i = np.where(item[y][x] == m_ch_v)
-            m_ch_i = m_ch_i[0][0]
-            
-            img[y][x][0] = int(COLOR_DICT[channels[m_ch_i]][0]*m_ch_v)
-            img[y][x][1] = int(COLOR_DICT[channels[m_ch_i]][1]*m_ch_v)
-            img[y][x][2] = int(COLOR_DICT[channels[m_ch_i]][2]*m_ch_v)
-            """
-            if m_ch_v > 0.5:
-                img[y][x][0] = int(COLOR_DICT[channels[m_ch_i]][0])
-                img[y][x][1] = int(COLOR_DICT[channels[m_ch_i]][1])
-                img[y][x][2] = int(COLOR_DICT[channels[m_ch_i]][2])
-            else:
-                img[y][x][0] = 255
-                img[y][x][1] = 255
-                img[y][x][2] = 255
-            """
+    rgb_matrix = np.zeros((len(channels),3))
+    for ch, color in enumerate(channels):
+        rgb_matrix[ch] = COLOR_DICT[color]
+    img = np.zeros((item.shape[0],item.shape[1],len(channels)))
+    img[:,:] = np.matmul(item[:,:],rgb_matrix)
     return img
 
 def saveResult(save_path, npyfile, channels):
