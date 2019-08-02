@@ -6,7 +6,7 @@ import os
 # 'ground', 'tree', 'bush', 'tower', 'wire', 'copter', 'car', 'build'
 # для каких классов была обучена?
 channels = ['wires', 'copter', 'bush']
-weights_path = 'weights/wires_copter_bushff.hdf5'
+weights_path = 'weights/wires_copter_bush.hdf5'
 test_path = 'data/predict/left'
 predict_path = 'data/predict/mask'
 

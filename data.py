@@ -3,6 +3,7 @@ import os
 import skimage.io as io
 import skimage.transform as trans
 from preprocess_png import gen, image_to_probs, probs_to_image
+import re
 
 ground = [0,0,0]
 trees = [0,255,0]
@@ -56,7 +57,9 @@ def testGenerator(test_path: str) -> np.ndarray:
     Берет изображения из test_path, делит изображения на кусочки (1, 256, 256, 5)
     возвращает кусочки поочередно
     """
-    for file in os.listdir(test_path):
+    files = os.listdir(test_path)
+    files.sort(key = lambda x: int(re.search(r'\d+', x).group()))
+    for file in files:
         img = io.imread(os.path.join(test_path, file))
         img = img / 255
         for img in image_to_probs(img):
