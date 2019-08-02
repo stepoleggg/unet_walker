@@ -1,5 +1,6 @@
 from model import unet, ModelCheckpoint
 from data import trainGenerator
+import os
 
 # доступные классы
 # 'ground', 'tree', 'bush', 'tower', 'wires', 'copter', 'car', 'build'
@@ -8,8 +9,11 @@ channels = ['wires', 'copter', 'bush']
 pretrained_weights_path = 'hfhfh'
 #сохранить в веса:
 weights_path = 'weights/wires_copter_bush.hdf5'
-
+#путь к тренировочному датасету
 train_path = 'data/train/'
+
+if not os.path.exists('weights'):
+    os.makedirs('weights')
 
 myGene = trainGenerator(channels)
 model = unet(len(channels), pretrained_weights = pretrained_weights_path)
