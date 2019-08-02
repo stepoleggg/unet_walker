@@ -58,16 +58,11 @@ def unet(num_channels, pretrained_weights = None, input_size = (256,256,3)):
     
     #model.summary()
 
-    if (pretrained_weights):
-        if(pretrained_weights!=''):
-            model.load_weights(pretrained_weights)
-            print("-")
-            print("yes pretrained")
-            print("-")
-        else:
-            print("-")
-            print("no pretrained")
-            print("-") 
+    if (pretrained_weights and os.path.isfile(pretrained_weights)):
+        model.load_weights(pretrained_weights)
+        print("-")
+        print("yes pretrained")
+        print("-")
     else:
         print("-")
         print("no pretrained")

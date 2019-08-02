@@ -1,0 +1,4 @@
+--label-color=copter:255,255,255
+--label-color=bush:0,255,0
+--label-color=wire:255,0,0
+--background-color=0,0,0

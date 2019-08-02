@@ -1,0 +1,1 @@
+python converter_xml2png.py --cvat-xml unet_wires_copter_bush_50.xml --output-dir out --mask-bitness 24 @labels.txt

@@ -16,23 +16,21 @@ buildings = [255,255,0]
 COLOR_DICT = dict(ground = ground, trees = trees, bush = bush, towers = towers, wires = wires, copter = copter, cars = cars, buildings = buildings)
 
 
-def adjustData(img, mask, flag_multi_class, channels):
+def adjustData(img, mask, channels):
     """
     Соответствует ли пиксель классу
     """
-    if(flag_multi_class):
-
-        img = img / 255  
-        new_mask = np.zeros(mask[:, :, :, 0].shape + (len(channels),))
+    img = img / 255  
+    new_mask = np.zeros(mask[:, :, :, 0].shape + (len(channels),))
         
-        for ch, color in enumerate(channels):
-            new_mask[:, :, :, ch] = (mask == COLOR_DICT[color]).all(axis=-1)
+    for ch, color in enumerate(channels):
+        new_mask[:, :, :, ch] = (mask == COLOR_DICT[color]).all(axis=-1)
 
-        return (img, new_mask)
+    return (img, new_mask)
 
 
 
-def trainGenerator(channels: list, flag_multi_class=True):
+def trainGenerator(channels: list):
     """
     Генератор изображения для обучения
     Возвращает кортеж из элементов (batch_size, 255, 255, 3)
@@ -46,7 +44,7 @@ def trainGenerator(channels: list, flag_multi_class=True):
         mask_1 = img2[2]
         img = np.array((img_0, img_1))
         mask = np.array((mask_0, mask_1))
-        img, mask = adjustData(img, mask, flag_multi_class, channels)
+        img, mask = adjustData(img, mask, channels)
 
         yield (img, mask)
 
@@ -74,7 +72,7 @@ def color(item, channels):
     rgb_matrix = np.zeros((len(channels),3))
     for ch, color in enumerate(channels):
         rgb_matrix[ch] = COLOR_DICT[color]
-    img = np.zeros((item.shape[0],item.shape[1],len(channels)))
+    img = np.zeros((item.shape[0],item.shape[1],3))
     img[:,:] = np.matmul(item[:,:],rgb_matrix)
     return img
 

@@ -5,7 +5,7 @@ from data import trainGenerator
 # 'ground', 'tree', 'bush', 'tower', 'wires', 'copter', 'car', 'build'
 channels = ['wires', 'copter', 'bush']
 #претренированные веса:
-pretrained_weights_path = ''
+pretrained_weights_path = 'hfhfh'
 #сохранить в веса:
 weights_path = 'weights/wires_copter_bush.hdf5'
 
