@@ -25,8 +25,18 @@ from albumentations import (
 
 resolution = (256, 256)
 
-def gen(path='data/train', batch=2):
-
+def gen(path='data/train', batch=2) -> list:
+    """
+    Готовит изображения для подачи на обучение
+    Разбивает изображение на 15 кусочков (255, 255, 3), трансформирует изображения, меняет контраст, намму, яркость
+    Возвращает - >
+    cv2.imshow('img0',imgs[0][0])
+    cv2.imshow('img1',imgs[1][0])
+    cv2.imshow('depth0',imgs[0][1])
+    cv2.imshow('depth1',imgs[1][1])
+    cv2.imshow('mask0',imgs[0][2])
+    cv2.imshow('mask1',imgs[1][2])
+    """
     seed(42)
     images = []
      
@@ -34,27 +44,18 @@ def gen(path='data/train', batch=2):
         images.append((f'{path}/left/{file}', f'{path}/depth/{file}', f'{path}/mask/{file}'))
         
     shuffle(images)
-    #x = 0
+
     while True:
         output = []
         
         for _ in range(batch):
             img, depth, mask = choice(images)
-            """
-            save_img = img.split('/')[-1]
-            save_depth = depth.split('/')[-1]
-            copyfile(depth,f'{path}save/depth_4_mask/{x}_{save_depth}')
-            copyfile(img,f'{path}save/left_4_mask/{x}_{save_img}')
-            """
             img, depth, mask = io.imread(img), io.imread(depth), io.imread(mask)
             img, depth, mask = img[:,:,0:3], depth[:,:,0:3], mask[:,:,0:3]
-            #print("before:")
-            #print(np.unique(mask, axis=-2))
             aug1 = Compose([
                 RandomCrop(height=resolution[0], width=resolution[1], p=1.0),
                 VerticalFlip(p=0.5),
                 RandomRotate90(p=0.5)],
-                #OpticalDistortion(p=0.8, distort_limit=0.2, shift_limit=0.2)],
                 additional_targets={
                     'depth': 'image',
                     'mask': 'image'
@@ -66,19 +67,9 @@ def gen(path='data/train', batch=2):
                 RandomBrightnessContrast(p=0.8),
                 RandomGamma(p=0.8)])(image = aug1["image"])
             output.append((aug2["image"], aug1["depth"], aug1["mask"]))
-            #x += 1
 
         yield output
-"""
-for imgs in gen():
-    cv2.imshow('img0',imgs[0][0])
-    cv2.imshow('img1',imgs[1][0])
-    cv2.imshow('depth0',imgs[0][1])
-    cv2.imshow('depth1',imgs[1][1])
-    cv2.imshow('mask0',imgs[0][2])
-    cv2.imshow('mask1',imgs[1][2])
-    cv2.waitKey()
-"""
+
 def image_to_probs(img: np.ndarray) -> list:
     """
     На вход подается изображение (720,1280,3), оно делиться на равные прямоугольники (256,256,3)

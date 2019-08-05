@@ -79,10 +79,13 @@ def color(item, channels):
     img[:,:] = np.matmul(item[:,:],rgb_matrix)
     return img
 
-def saveResult(save_path, npyfile, channels):
+def saveResult(save_path, output: np.ndarray, channels) -> None:
+    """
+    Получает результаты предикта, собирает изображение из кусочков и сохраняет в 'save_path'
+    """
     arr = []
     k = 0
-    for _, item in enumerate(npyfile):
+    for item in output:
 
         img = color(item, channels)
         arr.append(img)
@@ -90,7 +93,7 @@ def saveResult(save_path, npyfile, channels):
             img_save = probs_to_image(arr)
             img_save = img_save.astype(np.uint8)
             k+=1
-            io.imsave(os.path.join(save_path,"%d_predict.png"%k), img_save)
-            arr = []
+            io.imsave(os.path.join(save_path, f"{k}_predict.png"), img_save)
+            arr.clear()
         
         
