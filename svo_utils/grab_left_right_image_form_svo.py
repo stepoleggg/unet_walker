@@ -6,7 +6,10 @@ def main(filepath):
 
     print("Reading SVO file: {0}".format(filepath))
 
-    init = sl.InitParameters(svo_input_filename=filepath, svo_real_time_mode=False)
+    #init = sl.InitParameters(svo_input_filename=filepath, svo_real_time_mode=False)
+    init = sl.InitParameters()
+    init.set_from_svo_file(filepath)
+    init.svo_real_time_mode = False  # Don't convert in realtime
     cam = sl.Camera()
     status = cam.open(init)
     if status != sl.ERROR_CODE.SUCCESS:
@@ -25,10 +28,10 @@ def main(filepath):
     while True:
         err = cam.grab(runtime)
         if err == sl.ERROR_CODE.SUCCESS:
-            cam.retrieve_image(left, sl.VIEW.VIEW_LEFT)
-            #cam.retrieve_image(right, sl.VIEW.VIEW_RIGHT)
+            cam.retrieve_image(left, sl.VIEW.LEFT)
+            cam.retrieve_image(right, sl.VIEW.RIGHT)
             left.write(f'{filepath[0:-4]}/left/{i}.png')
-            #right.write(f'{filepath[0:-4]}/right/{i}.png')
+            right.write(f'{filepath[0:-4]}/right/{i}.png')
         else:
             print(repr(err))
             break
