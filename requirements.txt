@@ -1,3 +1,5 @@
 scikit-image
 numpy
 albumentations
+pyqt5
+pyqt5-tools

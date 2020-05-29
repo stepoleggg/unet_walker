@@ -3,14 +3,24 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QTextEdit,
     QAction, QFileDialog, QApplication, QMessageBox, QErrorMessage)
 from PyQt5.QtGui import QIcon
-import ui_template
+from interface.ui_template import Ui_mainWindow
+import train
+import read_svo
+import predict
+from config import data_dir, db_name
+import os, sys, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
 
-class App(QtWidgets.QMainWindow, ui_template.Ui_mainWindow):
+from svo_file import Svo_file
+
+class App(QtWidgets.QMainWindow, Ui_mainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         # init var
-        self.svo_file = None
+        self.svo_file: Svo_file
         # init func
         self.choseFileButton.clicked.connect(self.file_dialog)
         self.predictButton.clicked.connect(self.predict)
@@ -25,17 +35,23 @@ class App(QtWidgets.QMainWindow, ui_template.Ui_mainWindow):
         self.open_svo(fname)
     
     def train(self):
-        self.current_svo_error()
+        if self.current_svo_error():
+            train.train()
 
     def predict(self):
-        self.current_svo_error()
+        print(data_dir)
+        if self.current_svo_error():
+            predict.predict()
 
     def get_data(self):
-        self.current_svo_error()
+        if self.current_svo_error():
+            read_svo.read_svo(self.svo_file.svo_path)
 
-    def current_svo_error(self):
+    def current_svo_error(self) -> bool:
         if self.svo_file is None:
             self.show_error_widget("svo файл не выбран", "Выберите svo файл", "svo file not found")
+            return False
+        return True
 
     def open_svo(self, path: str):
         if path == "":
@@ -45,7 +61,7 @@ class App(QtWidgets.QMainWindow, ui_template.Ui_mainWindow):
             return
         else:
             self.show_info_widget("svo файл выбран", f"{path}")
-        self.svo_file = path
+        self.svo_file = Svo_file(path)
         self.add_data_to_list_view(f"Текущий svo фыйл {path}")
         
 
