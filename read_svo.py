@@ -1,14 +1,7 @@
-from svo_utils import grab_left_right_image_form_svo, svo_depth_to_pcd#, pcl_viewer
+from svo_utils import svo_to_views_and_depths
 
 def read_svo(path):
-    grab_left_right_image_form_svo(path)
-    d = svo_depth_to_pcd(path)
-    """
-    print('View pcd file? [y/n]')
-    user_cmd = input()
-    if user_cmd == 'y':
-        pcl_viewer(d)
-        """
+    svo_to_views_and_depths(path)
 
 if __name__ == "__main__":
     import sys

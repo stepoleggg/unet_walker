@@ -5,12 +5,12 @@ from pathlib import PurePath
 
 def main(filepath):
 
-    print("Reading SVO file: {0}".format(filepath))
+    print("Reading SVO file: {0} for views and depths".format(filepath))
 
-    #init = sl.InitParameters(svo_input_filename=filepath, svo_real_time_mode=False)
     init = sl.InitParameters()
     init.set_from_svo_file(filepath)
     init.svo_real_time_mode = False  # Don't convert in realtime
+    init.enable_right_side_measure = True
     cam = sl.Camera()
     status = cam.open(init)
     if status != sl.ERROR_CODE.SUCCESS:
@@ -18,31 +18,31 @@ def main(filepath):
         exit()
 
     runtime = sl.RuntimeParameters()
-    left = sl.Mat()
     right = sl.Mat()
+    right_depth = sl.Mat()
 
     file_name = PurePath(filepath).name[0:-4]
     filepath = data_dir + "\\" + file_name
 
-    if not os.path.exists(f'{filepath}\\left'):
-        os.makedirs(f'{filepath}\\left')
     if not os.path.exists(f'{filepath}\\right'):
         os.makedirs(f'{filepath}\\right')
+    if not os.path.exists(f'{filepath}\\right_depth'):
+        os.makedirs(f'{filepath}\\right_depth')
     i = 0
     while True:
         err = cam.grab(runtime)
         if err == sl.ERROR_CODE.SUCCESS:
-            cam.retrieve_image(left, sl.VIEW.LEFT)
             cam.retrieve_image(right, sl.VIEW.RIGHT)
-            left.write(f'{filepath}\\left\\{i}.png')
+            cam.retrieve_image(right_depth, sl.VIEW.DEPTH_RIGHT)
             right.write(f'{filepath}\\right\\{i}.png')
+            right_depth.write(f'{filepath}\\right_depth\\{i}.png')
         else:
             print(repr(err))
             break
         i+=1
 
     cam.close()
-    print("\nFINISH")
+    print("Views and depths saved")
 
 if __name__ == "__main__":
     import sys
