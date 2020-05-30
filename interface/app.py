@@ -27,11 +27,11 @@ class App(QtWidgets.QMainWindow, Ui_mainWindow):
         self.trainButton.clicked.connect(self.train)
         self.getDataButton.clicked.connect(self.get_data)
         # init list view
-        self.add_data_to_list_view("Выберите SVO файл")
+        #self.add_data_to_list_view("Выберите SVO файл")
 
 
     def file_dialog(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open svo file')[0]
+        fname = QFileDialog.getOpenFileName(self, 'Open SVO file')[0]
         self.open_svo(fname)
     
     def train(self):
@@ -41,7 +41,7 @@ class App(QtWidgets.QMainWindow, Ui_mainWindow):
     def predict(self):
         print(data_dir)
         if self.current_svo_error():
-            predict.predict()
+            predict.predict(self.svo_file.svo_path)
 
     def get_data(self):
         if self.current_svo_error():
@@ -49,7 +49,7 @@ class App(QtWidgets.QMainWindow, Ui_mainWindow):
 
     def current_svo_error(self) -> bool:
         if self.svo_file is None:
-            self.show_error_widget("svo файл не выбран", "Выберите svo файл", "svo file not found")
+            self.show_error_widget("SVO файл не выбран", "Выберите SVO файл", "SVO file not found")
             return False
         return True
 
@@ -57,12 +57,12 @@ class App(QtWidgets.QMainWindow, Ui_mainWindow):
         if path == "":
             return
         if not path.endswith(".svo"):
-            self.show_error_widget("Ошибка при чтении svo файла", f"{path} не имеет расширение svo", "Error svo read")
+            self.show_error_widget("Ошибка при чтении SVO файла", f"{path} не имеет расширение SVO", "Error SVO read")
             return
         else:
-            self.show_info_widget("svo файл выбран", f"{path}")
+            self.show_info_widget("SVO файл добавлен", f"{path}")
         self.svo_file = Svo_file(path)
-        self.add_data_to_list_view(f"Текущий svo фыйл {path}")
+        self.add_data_to_list_view(f"{path}")
         
 
     def add_data_to_list_view(self, data):
