@@ -5,7 +5,7 @@ class CapturedText(object):
     pass
 
 @contextmanager
-def captured(callback, disallow_stderr=True):
+def captured(disallow_stderr=True):
     """
     Context manager to capture the printed output of the code in the with block
 
@@ -31,6 +31,5 @@ def captured(callback, disallow_stderr=True):
     c.stderr = errfile.getvalue()
     sys.stdout = stdout
     sys.stderr = stderr
-    callback.emit(stdout)
     if disallow_stderr and c.stderr:
         raise Exception("Got stderr output: %s" % c.stderr)

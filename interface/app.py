@@ -35,7 +35,7 @@ class App(QMainWindow, Ui_mainWindow):
 
 
     def progress_fn(self, n):
-        self.add_data_to_list_view(str(n))
+        self.add_data_to_list_view(n)
  
     def print_output(self, s):
         print(s)
@@ -73,8 +73,9 @@ class App(QMainWindow, Ui_mainWindow):
             self.threadpool.start(worker)
     
     def _get_data(self, progress_callback):
-        with captured(progress_callback) as c:
-            read_svo.read_svo(self.svo_files[0].svo_path)
+        for file in self.svo_files:
+            read_svo.read_svo(self.svo_file.svo_path, progress_callback)
+        return "ok"
  
     def current_svo_error(self) -> bool:
         if not self.svo_files:
