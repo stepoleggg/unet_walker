@@ -1,26 +1,27 @@
 import sys  
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import (QMainWindow, QTextEdit,
-    QAction, QFileDialog, QApplication, QMessageBox, QErrorMessage)
+
 from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 from interface.ui_template import Ui_mainWindow
 import train
 import read_svo
 import predict
 from config import data_dir, db_name
-import os, sys, inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir) 
+from typing import List
+from CapturedText import captured
+import time
+import traceback
 
 from svo_file import Svo_file
 
-class App(QtWidgets.QMainWindow, Ui_mainWindow):
+class App(QMainWindow, Ui_mainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         # init var
-        self.svo_file: Svo_file
+        self.svo_files: List[Svo_file] = []
         # init func
         self.choseFileButton.clicked.connect(self.file_dialog)
         self.predictButton.clicked.connect(self.predict)
@@ -28,32 +29,64 @@ class App(QtWidgets.QMainWindow, Ui_mainWindow):
         self.getDataButton.clicked.connect(self.get_data)
         # init list view
         #self.add_data_to_list_view("Выберите SVO файл")
+        # init multitrading 
+        self.threadpool = QThreadPool()
+        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
+
+    def progress_fn(self, n):
+            print(n)
+ 
+    def print_output(self, s):
+        print(s)
+        
+    def thread_complete(self):
+        print("THREAD COMPLETE!")
 
     def file_dialog(self):
-        fname = QFileDialog.getOpenFileName(self, 'Open SVO file')[0]
-        self.open_svo(fname)
-    
+        fname = QFileDialog.getOpenFileNames(self, 'Open SVO files', None, "Svo (*.svo)")[0]
+        for svo in fname:
+            self.open_svo(svo)
+            """
+            worker = Worker(self.open_svo, svo) # Any other args, kwargs are passed to the run function
+            worker.signals.result.connect(self.print_output)
+            worker.signals.finished.connect(self.thread_complete)
+            worker.signals.progress.connect(self.progress_fn)
+            self.threadpool.start(worker) 
+            """
+
+     
     def train(self):
         if self.current_svo_error():
             train.train()
 
     def predict(self):
-        print(data_dir)
         if self.current_svo_error():
             predict.predict(self.svo_file.svo_path)
 
     def get_data(self):
         if self.current_svo_error():
-            read_svo.read_svo(self.svo_file.svo_path)
+            worker = Worker(self._get_data) # Any other args, kwargs are passed to the run function
+            worker.signals.result.connect(self.print_output)
+            worker.signals.finished.connect(self.thread_complete)
+            worker.signals.progress.connect(self.progress_fn)
+            
+    
+    def _get_data(self, progress_callback):
+        with captured() as c:
+            read_svo.read_svo(self.svo_files[0].svo_path)
+        while True:
+            time.sleep(1)
+            progress_callback.emit(c.stdout)
 
     def current_svo_error(self) -> bool:
-        if self.svo_file is None:
+        if not self.svo_files:
             self.show_error_widget("SVO файл не выбран", "Выберите SVO файл", "SVO file not found")
             return False
         return True
 
-    def open_svo(self, path: str):
+    def open_svo(self, path: str, progress_callback = None):
+        progress_callback.emit("da")
         if path == "":
             return
         if not path.endswith(".svo"):
@@ -61,9 +94,11 @@ class App(QtWidgets.QMainWindow, Ui_mainWindow):
             return
         else:
             self.show_info_widget("SVO файл добавлен", f"{path}")
-        self.svo_file = Svo_file(path)
+        svo_file = Svo_file(path)
+        self.svo_files.append(svo_file)
         self.add_data_to_list_view(f"{path}")
-        
+        return "ok"
+       
 
     def add_data_to_list_view(self, data):
         self.listWidget.addItem(data)
@@ -85,10 +120,79 @@ class App(QtWidgets.QMainWindow, Ui_mainWindow):
         msg.exec()
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
+    app = QApplication(sys.argv)  # Новый экземпляр QApplication
     window = App() 
     window.show()  
-    app.exec_() 
+    app.exec_()
+
+class WorkerSignals(QObject):
+    '''
+    Defines the signals available from a running worker thread.
+
+    Supported signals are:
+
+    finished
+        No data
+    
+    error
+        `tuple` (exctype, value, traceback.format_exc() )
+    
+    result
+        `object` data returned from processing, anything
+
+    progress
+        `int` indicating % progress 
+
+    '''
+    finished = pyqtSignal()
+    error = pyqtSignal(object)
+    result = pyqtSignal(object)
+    progress = pyqtSignal(object)
+
+
+class Worker(QRunnable):
+    '''
+    Worker thread
+
+    Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
+
+    :param callback: The function callback to run on this worker thread. Supplied args and 
+                     kwargs will be passed through to the runner.
+    :type callback: function
+    :param args: Arguments to pass to the callback function
+    :param kwargs: Keywords to pass to the callback function
+
+    '''
+
+    def __init__(self, fn, *args, **kwargs):
+        super(Worker, self).__init__()
+
+        # Store constructor arguments (re-used for processing)
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+        self.signals = WorkerSignals()    
+
+        # Add the callback to our kwargs
+        self.kwargs['progress_callback'] = self.signals.progress        
+
+    @pyqtSlot()
+    def run(self):
+        '''
+        Initialise the runner function with passed args, kwargs.
+        '''
+        
+        # Retrieve args/kwargs here; and fire processing using them
+        try:
+            result = self.fn(*self.args, **self.kwargs)
+        except:
+            traceback.print_exc()
+            exctype, value = sys.exc_info()[:2]
+            self.signals.error.emit((exctype, value, traceback.format_exc()))
+        else:
+            self.signals.result.emit(result)  # Return the result of the processing
+        finally:
+            self.signals.finished.emit()  # Done 
 
 if __name__ == '__main__':  
     main()
