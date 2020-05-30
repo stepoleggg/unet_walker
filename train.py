@@ -5,11 +5,11 @@ import os
 def train():
     # доступные классы
     # 'ground', 'tree', 'bush', 'tower', 'wires', 'copter', 'car', 'build'
-    channels = ['wires', 'copter', 'bush']
+    channels = ['bush']
     #претренированные веса:
     pretrained_weights_path = 'hfhfh'
     #сохранить в веса:
-    weights_path = 'weights/weights_new.hdf5'
+    weights_path = 'weights/weights_bush_only.hdf5'
     #путь к тренировочному датасету
     train_path = 'data/train/'
 

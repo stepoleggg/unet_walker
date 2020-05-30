@@ -6,8 +6,6 @@ from pathlib import PurePath
 def main(filepath):
 
     print("Reading SVO file: {0}".format(filepath))
-    file_name = PurePath(filepath).name[0:-4]
-    filepath = data_dir + "\\" + file_name
 
     #init = sl.InitParameters(svo_input_filename=filepath, svo_real_time_mode=False)
     init = sl.InitParameters()
@@ -22,6 +20,9 @@ def main(filepath):
     runtime = sl.RuntimeParameters()
     left = sl.Mat()
     right = sl.Mat()
+
+    file_name = PurePath(filepath).name[0:-4]
+    filepath = data_dir + "\\" + file_name
 
     if not os.path.exists(f'{filepath}\\left'):
         os.makedirs(f'{filepath}\\left')

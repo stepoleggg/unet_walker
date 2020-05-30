@@ -49,7 +49,23 @@ def trainGenerator(channels: list):
 
         yield (img, mask)
 
-
+def depthGenerator(depth_path: str) -> np.ndarray:
+    """
+    Генератор глубин
+    Берет изображения из depth_path
+    Возвращает массив 720 x 1280 cо значениями от 0 до 1, 
+    отображающими расстояние до точки
+    """
+    files = os.listdir(depth_path)
+    files.sort(key = lambda x: int(re.search(r'\d+', x).group()))
+    for file in files:
+        img = io.imread(os.path.join(depth_path, file))
+        #img = img / 255
+        #for img in image_to_probs(img):
+        #    img = img[:,:,0:3]
+        #    img = np.reshape(img, (1,)+img.shape)
+        #
+        yield img
 
 def testGenerator(test_path: str) -> np.ndarray:
     """
@@ -79,21 +95,18 @@ def color(item, channels):
     img[:,:] = np.matmul(item[:,:],rgb_matrix)
     return img
 
-def saveResult(save_path, output: np.ndarray, channels) -> None:
+def saveResult(save_path, output, channels, file_name) -> None:
     """
     Получает результаты предикта, собирает изображение из кусочков и сохраняет в 'save_path'
     """
     arr = []
-    k = 0
     for item in output:
-
         img = color(item, channels)
         arr.append(img)
         if len(arr)==15:
             img_save = probs_to_image(arr)
             img_save = img_save.astype(np.uint8)
-            k+=1
-            io.imsave(os.path.join(save_path, f"{k}_predict.png"), img_save)
+            io.imsave(os.path.join(save_path, file_name), img_save)
             arr.clear()
         
         

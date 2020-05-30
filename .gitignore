@@ -3,4 +3,5 @@
 __pycache__
 *.svo
 *.avi
+*.png
 .vscode
