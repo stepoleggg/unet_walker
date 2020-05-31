@@ -2,6 +2,7 @@ from config import data_dir
 import pyzed.sl as sl
 import os
 from pathlib import PurePath
+import codecs, json 
 
 def main(filepath, callback = None):
 
@@ -22,16 +23,15 @@ def main(filepath, callback = None):
 
     runtime = sl.RuntimeParameters()
     right = sl.Mat()
-    right_depth = sl.Mat()
     right_measure = sl.Mat()
 
     file_name = PurePath(filepath).name[0:-4]
+    print(filepath)
+    print(file_name)
     filepath = data_dir + "\\" + file_name
 
     if not os.path.exists(f'{filepath}\\right'):
         os.makedirs(f'{filepath}\\right')
-    if not os.path.exists(f'{filepath}\\right_depth'):
-        os.makedirs(f'{filepath}\\right_depth')
     if not os.path.exists(f'{filepath}\\right_measure'):
         os.makedirs(f'{filepath}\\right_measure')
     i = 0
@@ -39,12 +39,9 @@ def main(filepath, callback = None):
         err = cam.grab(runtime)
         if err == sl.ERROR_CODE.SUCCESS:
             cam.retrieve_image(right, sl.VIEW.RIGHT)
-            cam.retrieve_image(right_depth, sl.VIEW.DEPTH_RIGHT)
             cam.retrieve_measure(right_measure, sl.MEASURE.DEPTH_RIGHT)
             right.write(f'{filepath}\\right\\{i}.png')
-            right_depth.write(f'{filepath}\\right_depth\\{i}.png')
-            #print(right_measure)
-            right_measure.write(f'{filepath}\\right_measure\\{i}')
+            json.dump(right_measure.get_data().tolist(), codecs.open(f'{filepath}\\right_measure\\{i}.json', 'w'), separators=(',',':'))
         else:
             print(repr(err))
             break

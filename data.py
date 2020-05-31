@@ -3,7 +3,6 @@ import os
 import skimage.io as io
 import skimage.transform as trans
 from preprocess_png import gen, image_to_probs, probs_to_image
-import pyzed.sl as sl
 import re
 
 ground = [0,0,0]
@@ -49,11 +48,6 @@ def trainGenerator(channels: list):
         img, mask = adjustData(img, mask, channels)
 
         yield (img, mask)
-
-def read_measure(measure_path: str, frame_number):
-    measure = sl.Mat()
-    measure.read(f'{measure_path}\\{frame_number}')
-    return measure
 
 def testGenerator(test_path: str) -> np.ndarray:
     """

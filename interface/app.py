@@ -74,7 +74,7 @@ class App(QMainWindow, Ui_mainWindow):
     
     def _get_data(self, progress_callback):
         for file in self.svo_files:
-            read_svo.read_svo(self.svo_file.svo_path, progress_callback)
+            read_svo.read_svo(file.svo_path, progress_callback)
         return "ok"
  
     def current_svo_error(self) -> bool:
