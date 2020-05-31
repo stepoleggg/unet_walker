@@ -35,7 +35,7 @@ class App(QMainWindow, Ui_mainWindow):
 
 
     def progress_fn(self, n):
-            print(n)
+        self.add_data_to_list_view(n)
  
     def print_output(self, s):
         print(s)
@@ -70,15 +70,13 @@ class App(QMainWindow, Ui_mainWindow):
             worker.signals.result.connect(self.print_output)
             worker.signals.finished.connect(self.thread_complete)
             worker.signals.progress.connect(self.progress_fn)
-            
+            self.threadpool.start(worker)
     
     def _get_data(self, progress_callback):
-        with captured() as c:
-            read_svo.read_svo(self.svo_files[0].svo_path)
-        while True:
-            time.sleep(1)
-            progress_callback.emit(c.stdout)
-
+        for file in self.svo_files:
+            read_svo.read_svo(self.svo_file.svo_path, progress_callback)
+        return "ok"
+ 
     def current_svo_error(self) -> bool:
         if not self.svo_files:
             self.show_error_widget("SVO файл не выбран", "Выберите SVO файл", "SVO file not found")
@@ -86,7 +84,6 @@ class App(QMainWindow, Ui_mainWindow):
         return True
 
     def open_svo(self, path: str, progress_callback = None):
-        progress_callback.emit("da")
         if path == "":
             return
         if not path.endswith(".svo"):

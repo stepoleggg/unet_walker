@@ -3,8 +3,10 @@ import pyzed.sl as sl
 import os
 from pathlib import PurePath
 
-def main(filepath):
+def main(filepath, callback = None):
 
+    if callback:
+        callback.emit("Reading SVO file: {0} for views and depths".format(filepath))
     print("Reading SVO file: {0} for views and depths".format(filepath))
 
     init = sl.InitParameters()
@@ -49,6 +51,8 @@ def main(filepath):
         i+=1
 
     cam.close()
+    if callback:
+        callback.emit("Views and depths saved")
     print("Views and depths saved")
 
 if __name__ == "__main__":
