@@ -11,6 +11,7 @@ def main(filepath):
     init.set_from_svo_file(filepath)
     init.svo_real_time_mode = False  # Don't convert in realtime
     init.enable_right_side_measure = True
+    init.coordinate_units = sl.UNIT.MILLIMETER
     cam = sl.Camera()
     status = cam.open(init)
     if status != sl.ERROR_CODE.SUCCESS:
@@ -20,6 +21,7 @@ def main(filepath):
     runtime = sl.RuntimeParameters()
     right = sl.Mat()
     right_depth = sl.Mat()
+    right_measure = sl.Mat()
 
     file_name = PurePath(filepath).name[0:-4]
     filepath = data_dir + "\\" + file_name
@@ -28,14 +30,19 @@ def main(filepath):
         os.makedirs(f'{filepath}\\right')
     if not os.path.exists(f'{filepath}\\right_depth'):
         os.makedirs(f'{filepath}\\right_depth')
+    if not os.path.exists(f'{filepath}\\right_measure'):
+        os.makedirs(f'{filepath}\\right_measure')
     i = 0
     while True:
         err = cam.grab(runtime)
         if err == sl.ERROR_CODE.SUCCESS:
             cam.retrieve_image(right, sl.VIEW.RIGHT)
             cam.retrieve_image(right_depth, sl.VIEW.DEPTH_RIGHT)
+            cam.retrieve_measure(right_measure, sl.MEASURE.DEPTH_RIGHT)
             right.write(f'{filepath}\\right\\{i}.png')
             right_depth.write(f'{filepath}\\right_depth\\{i}.png')
+            #print(right_measure)
+            right_measure.write(f'{filepath}\\right_measure\\{i}')
         else:
             print(repr(err))
             break

@@ -3,6 +3,7 @@ import os
 import skimage.io as io
 import skimage.transform as trans
 from preprocess_png import gen, image_to_probs, probs_to_image
+import pyzed.sl as sl
 import re
 
 ground = [0,0,0]
@@ -49,23 +50,10 @@ def trainGenerator(channels: list):
 
         yield (img, mask)
 
-def depthGenerator(depth_path: str) -> np.ndarray:
-    """
-    Генератор глубин
-    Берет изображения из depth_path
-    Возвращает массив 720 x 1280 cо значениями от 0 до 1, 
-    отображающими расстояние до точки
-    """
-    files = os.listdir(depth_path)
-    files.sort(key = lambda x: int(re.search(r'\d+', x).group()))
-    for file in files:
-        img = io.imread(os.path.join(depth_path, file))
-        #img = img / 255
-        #for img in image_to_probs(img):
-        #    img = img[:,:,0:3]
-        #    img = np.reshape(img, (1,)+img.shape)
-        #
-        yield img
+def read_measure(measure_path: str, frame_number):
+    measure = sl.Mat()
+    measure.read(f'{measure_path}\\{frame_number}')
+    return measure
 
 def testGenerator(test_path: str) -> np.ndarray:
     """
