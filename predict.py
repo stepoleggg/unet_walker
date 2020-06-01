@@ -29,7 +29,8 @@ def predict(file_name):
                 pred.append(next(testGene))
             results = model.predict_generator(iter(pred), 15, verbose=1)
             min_depth = analyze_bush_depth(results, right_measures_path, frame_number)
-            #saveResult(mask_path, results, channels, frame_number)
+            print(f'MIN DEPTH: {min_depth}')
+            saveResult(mask_path, results, channels, frame_number)
 
 if __name__ == "__main__":
-    predict("rec2018_07_21-6")
+    predict("rec2018_07_12-3")

@@ -14,7 +14,8 @@ def main(filepath, callback = None):
     init.set_from_svo_file(filepath)
     init.svo_real_time_mode = False  # Don't convert in realtime
     init.enable_right_side_measure = True
-    init.coordinate_units = sl.UNIT.MILLIMETER
+    init.coordinate_units = sl.UNIT.METER # Измерения в метрах
+
     cam = sl.Camera()
     status = cam.open(init)
     if status != sl.ERROR_CODE.SUCCESS:
@@ -22,6 +23,7 @@ def main(filepath, callback = None):
         exit()
 
     runtime = sl.RuntimeParameters()
+
     right = sl.Mat()
     right_measure = sl.Mat()
 
@@ -38,10 +40,17 @@ def main(filepath, callback = None):
     while True:
         err = cam.grab(runtime)
         if err == sl.ERROR_CODE.SUCCESS:
+            # Правое изображение
             cam.retrieve_image(right, sl.VIEW.RIGHT)
+            # Правая глубина
             cam.retrieve_measure(right_measure, sl.MEASURE.DEPTH_RIGHT)
+            # Время
+            time = cam.get_timestamp(sl.TIME_REFERENCE.IMAGE)
+            # Сохранение изображения
             right.write(f'{filepath}\\right\\{i}.png')
-            json.dump(right_measure.get_data().tolist(), codecs.open(f'{filepath}\\right_measure\\{i}.json', 'w'), separators=(',',':'))
+            # Сохранение измерений глубины и времени
+            data = {'time': time.get_milliseconds(), 'measures': right_measure.get_data().tolist()}
+            json.dump(data, codecs.open(f'{filepath}\\right_measure\\{i}.json', 'w'), separators=(',',':'))
         else:
             print(repr(err))
             break
