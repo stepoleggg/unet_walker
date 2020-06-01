@@ -3,3 +3,4 @@ numpy
 albumentations
 pyqt5
 pyqt5-tools
+matplotlib

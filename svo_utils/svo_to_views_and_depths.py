@@ -2,7 +2,7 @@ from config import data_dir
 import pyzed.sl as sl
 import os
 from pathlib import PurePath
-import codecs, json 
+from data import save_to_json
 
 def main(filepath, callback = None):
 
@@ -50,7 +50,7 @@ def main(filepath, callback = None):
             right.write(f'{filepath}\\right\\{i}.png')
             # Сохранение измерений глубины и времени
             data = {'time': time.get_milliseconds(), 'measures': right_measure.get_data().tolist()}
-            json.dump(data, codecs.open(f'{filepath}\\right_measure\\{i}.json', 'w'), separators=(',',':'))
+            save_to_json(data, f'{filepath}\\right_measure\\{i}.json')
         else:
             print(repr(err))
             break

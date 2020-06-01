@@ -4,6 +4,8 @@ import skimage.io as io
 import skimage.transform as trans
 from preprocess_png import gen, image_to_probs, probs_to_image
 import re
+import codecs, json 
+import cv2
 
 ground = [0,0,0]
 trees = [0,255,0]
@@ -28,8 +30,6 @@ def adjustData(img, mask, channels):
         new_mask[:, :, :, ch] = (mask == COLOR_DICT[color]).all(axis=-1)
 
     return (img, new_mask)
-
-
 
 def trainGenerator(channels: list):
     """
@@ -77,7 +77,7 @@ def color(item, channels):
     img[:,:] = np.matmul(item[:,:],rgb_matrix)
     return img
 
-def saveResult(save_path, output, channels, frame_number) -> None:
+def saveResult(save_path, output, channels, frame_number, cords) -> None:
     """
     Получает результаты предикта, собирает изображение из кусочков и сохраняет в 'save_path'
     """
@@ -90,7 +90,16 @@ def saveResult(save_path, output, channels, frame_number) -> None:
         if len(arr)==15:
             img_save = probs_to_image(arr)
             img_save = img_save.astype(np.uint8)
+            img_save = cv2.circle(img_save, (cords[1], cords[0]), 20, (255, 0, 0), 2)
             io.imsave(os.path.join(save_path, f"{frame_number}.png"), img_save)
             arr.clear()
+
+def save_to_json(object, filepath):
+    json.dump(object, codecs.open(filepath, 'w'), separators=(',',':'))
+
+def read_from_json(filepath):
+    data = codecs.open(filepath, 'r', encoding='utf-8').read()
+    json_data = json.loads(data)
+    return json_data
         
         

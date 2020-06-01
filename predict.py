@@ -3,6 +3,7 @@ from data import testGenerator, saveResult
 from analyzer import analyze_bush_depth
 from config import weights_path, predict_path
 from pathlib import PurePath
+from data import save_to_json
 import os
 
 def predict(file_name):
@@ -12,10 +13,17 @@ def predict(file_name):
     channels = ['bush']
 
     # file_name - имя SVO папки, например: rec2018_07_21-6
+    root_path = predict_path + "\\" + file_name
+    right_views_path = root_path + "\\right"
+    right_measures_path = root_path + "\\right_measure"
+    mask_path = root_path + "\\mask"
+    analyzed_result_path = root_path + "\\report.json"
 
-    right_views_path = predict_path + "\\" + file_name + "\\right"
-    right_measures_path = predict_path + "\\" + file_name + "\\right_measure"
-    mask_path = predict_path + "\\" + file_name + "\\mask"
+    distances = []
+    timestamps = []
+    frame_numbers = []
+    coordinates = []
+    probabilities = []
 
     if not os.path.exists(weights_path):
         print(f"Файл весов {weights_path} не существует!")
@@ -28,9 +36,21 @@ def predict(file_name):
             for _ in range(15):
                 pred.append(next(testGene))
             results = model.predict_generator(iter(pred), 15, verbose=1)
-            min_depth = analyze_bush_depth(results, right_measures_path, frame_number)
-            print(f'MIN DEPTH: {min_depth}')
-            saveResult(mask_path, results, channels, frame_number)
+            # расчет минимальной дистанции до ДКР, получение времени съемки, координат наиболее близкого пикселя 
+            min_depth, time_milliseconds, coordinate, probability = analyze_bush_depth(results, right_measures_path, frame_number)
+            # запись результирующих данных
+            distances.append(min_depth)
+            timestamps.append(time_milliseconds)
+            frame_numbers.append(frame_number)
+            coordinates.append(coordinate)
+            probabilities.append(probability)
+            print(f'{frame_number+1}/{frames_length} completed')
+            # сохранение распознанного кадра
+            saveResult(mask_path, results, channels, frame_number, coordinate)
+        # сохранение результатов анализа
+        analyzed_data = {'distances': distances, 'timestamps': timestamps, 'frame_numbers': frame_numbers, 'coordinates': coordinates, 'probabilities': probabilities}
+        save_to_json(analyzed_data, analyzed_result_path)
+        
 
 if __name__ == "__main__":
-    predict("rec2018_07_12-3")
+    predict("rec2018_07_21-8")
