@@ -6,7 +6,7 @@ from pathlib import PurePath
 from data import save_to_json
 import os
 
-def predict(file_name):
+def predict(file_name, callback = None):
     # доступные классы
     # 'ground', 'tree', 'bush', 'tower', 'wire', 'copter', 'car', 'build'
     # для каких классов была обучена?
@@ -33,6 +33,7 @@ def predict(file_name):
         testGene = testGenerator(right_views_path)
         for frame_number in range(frames_length):
             pred = []
+            callback.emit(f"Файлов обработано {frame_number}")
             for _ in range(15):
                 pred.append(next(testGene))
             results = model.predict_generator(iter(pred), 15, verbose=1)
@@ -50,7 +51,7 @@ def predict(file_name):
         # сохранение результатов анализа
         analyzed_data = {'distances': distances, 'timestamps': timestamps, 'frame_numbers': frame_numbers, 'coordinates': coordinates, 'probabilities': probabilities}
         save_to_json(analyzed_data, analyzed_result_path)
-        
+    return "ok"    
 
 if __name__ == "__main__":
     predict("rec2018_07_21-8")

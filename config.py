@@ -9,3 +9,4 @@ predict_path = config['DEFAULT']['predict_path']
 train_path = config['DEFAULT']['predict_path']
 bush_treshold = float(config['DEFAULT']['bush_treshold'])
 average_frame_size = int(config['DEFAULT']['average_frame_size'])
+svo_dir = config['DEFAULT']['svo_dir']

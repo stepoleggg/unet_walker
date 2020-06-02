@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>458</width>
-    <height>379</height>
+    <width>837</width>
+    <height>518</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,21 +20,21 @@
    <widget class="QPushButton" name="choseFileButton">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>330</y>
+      <x>20</x>
+      <y>340</y>
       <width>131</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Выбрать файл</string>
+     <string>Выбрать файлы</string>
     </property>
    </widget>
    <widget class="QPushButton" name="predictButton">
     <property name="geometry">
      <rect>
-      <x>330</x>
-      <y>90</y>
+      <x>700</x>
+      <y>50</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -43,33 +43,20 @@
      <string>Предикт</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="trainButton">
-    <property name="geometry">
-     <rect>
-      <x>330</x>
-      <y>50</y>
-      <width>101</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Обучение</string>
-    </property>
-   </widget>
    <widget class="QListWidget" name="listWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
+      <x>380</x>
       <y>10</y>
       <width>311</width>
-      <height>311</height>
+      <height>321</height>
      </rect>
     </property>
    </widget>
    <widget class="QPushButton" name="getDataButton">
     <property name="geometry">
      <rect>
-      <x>330</x>
+      <x>700</x>
       <y>10</y>
       <width>101</width>
       <height>31</height>
@@ -77,6 +64,32 @@
     </property>
     <property name="text">
      <string>Получить данные</string>
+    </property>
+   </widget>
+   <widget class="QTableView" name="tableView">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>361</width>
+      <height>321</height>
+     </rect>
+    </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>true</bool>
+    </attribute>
+   </widget>
+   <widget class="QPushButton" name="clearButton">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>340</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Очистить</string>
     </property>
    </widget>
   </widget>

@@ -60,6 +60,7 @@ def main(filepath, callback = None):
     if callback:
         callback.emit("Views and depths saved")
     print("Views and depths saved")
+    return "ok"
 
 if __name__ == "__main__":
     import sys

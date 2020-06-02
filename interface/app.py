@@ -8,13 +8,17 @@ from interface.ui_template import Ui_mainWindow
 import train
 import read_svo
 import predict
-from config import data_dir, db_name
+from config import data_dir, db_name, svo_dir
 from typing import List
 from CapturedText import captured
 import time
 import traceback
+import shutil
+from pathlib import PurePath
+from interface.TableModel import TableModel
 
 from svo_file import Svo_file
+from SVODao import Svo_DB
 
 class App(QMainWindow, Ui_mainWindow):
     def __init__(self):
@@ -22,17 +26,40 @@ class App(QMainWindow, Ui_mainWindow):
         self.setupUi(self)
         # init var
         self.svo_files: List[Svo_file] = []
+        self.svo_files_db: List[Svo_file] = []
         # init func
         self.choseFileButton.clicked.connect(self.file_dialog)
         self.predictButton.clicked.connect(self.predict)
-        self.trainButton.clicked.connect(self.train)
         self.getDataButton.clicked.connect(self.get_data)
+        self.clearButton.clicked.connect(self.clear_table)
         # init list view
         #self.add_data_to_list_view("Выберите SVO файл")
         # init multitrading 
         self.threadpool = QThreadPool()
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
+        # init db 
+        self.update_db()
+        self.update_table()
+
+    def clear_table(self):
+        self.svo_files = []
+        self.update_table()
+        self.update_db()
+
+
+    def update_table(self):
+        data = []
+        for svo_file in self.svo_files:
+            data.append(svo_file.get_data_for_insert())
+        if not data:
+            data = [["", "", "", "", ""]]
+        self.tableModel = TableModel(data)
+        self.tableView.setModel(self.tableModel)
+
+    def update_db(self):
+        for m in Svo_DB.get_all_svo():
+            self.svo_files_db.append(m)
 
     def progress_fn(self, n):
         self.add_data_to_list_view(n)
@@ -56,13 +83,28 @@ class App(QMainWindow, Ui_mainWindow):
             """
 
      
-    def train(self):
-        if self.current_svo_error():
-            train.train()
-
     def predict(self):
+        worker = Worker(self._predict)
+        worker.signals.result.connect(self.print_output)
+        worker.signals.finished.connect(self.thread_complete)
+        worker.signals.progress.connect(self.progress_fn)
+        self.threadpool.start(worker)    
+
+    def _predict(self, progress_callback):
         if self.current_svo_error():
-            predict.predict(self.svo_file.svo_path)
+            for file in self.svo_files:
+                if not file.get_data:
+                    if read_svo.read_svo(file.svo_path, progress_callback) == "ok":
+                       file.get_data = True
+                       Svo_DB.update_svo(file)
+                       self.update_db()
+                    else:
+                        continue
+                if predict.predict(file.svo_dir_name, progress_callback) == "ok":
+                    file.predict = True
+                    Svo_DB.update_svo(file)
+                    self.update_db()
+            self.update_table()
 
     def get_data(self):
         if self.current_svo_error():
@@ -74,7 +116,12 @@ class App(QMainWindow, Ui_mainWindow):
     
     def _get_data(self, progress_callback):
         for file in self.svo_files:
-            read_svo.read_svo(file.svo_path, progress_callback)
+            if not file.get_data:
+                if read_svo.read_svo(file.svo_path, progress_callback) == "ok":
+                    file.get_data = True
+                    Svo_DB.update_svo(file)
+                    self.update_db()
+        self.update_table()
         return "ok"
  
     def current_svo_error(self) -> bool:
@@ -91,9 +138,19 @@ class App(QMainWindow, Ui_mainWindow):
             return
         else:
             self.show_info_widget("SVO файл добавлен", f"{path}")
-        svo_file = Svo_file(path)
-        self.svo_files.append(svo_file)
-        self.add_data_to_list_view(f"{path}")
+        
+        svo, u = Svo_file.is_unique(self.svo_files_db, Svo_file(path))
+        if u:
+            if PurePath(path).parent != PurePath(svo_dir):
+                shutil.copy(path, svo_dir)
+            svo_file = Svo_file(path)
+            self.svo_files.append(svo_file)
+            self.add_data_to_list_view(f"{svo_file.svo_path}")
+            Svo_DB.insert_svo(svo_file)
+        else:
+            self.svo_files.append(svo)
+            self.add_data_to_list_view(f"{svo.svo_path}")
+        self.update_table()
         return "ok"
        
 
