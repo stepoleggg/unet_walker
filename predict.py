@@ -33,7 +33,8 @@ def predict(file_name, callback = None):
         testGene = testGenerator(right_views_path)
         for frame_number in range(frames_length):
             pred = []
-            callback.emit(f"Файлов обработано {frame_number}")
+            if callback is not None:
+                callback.emit(f"Файлов обработано {frame_number}")
             for _ in range(15):
                 pred.append(next(testGene))
             results = model.predict_generator(iter(pred), 15, verbose=1)
