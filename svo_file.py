@@ -2,6 +2,8 @@ from pathlib import PurePath
 from config import data_dir, svo_dir
 from datetime import datetime
 import os 
+import time
+
 class Svo_file:
     def __init__(self, svo_path):
         self.file_name = PurePath(svo_path).name
@@ -24,7 +26,7 @@ class Svo_file:
         svo = cls(os.path.join(svo_dir, data[0]))
         svo.predict = bool(data[3])
         svo.get_data = bool(data[2])
-        svo.date = datetime.strptime(data[1], "YYYY-MM-DD HH:MM:SS.mmmmmm")
+        svo.date = datetime.fromtimestamp(time.mktime(time.strptime(data[1].split(".")[0], "%Y-%m-%d %H:%M:%S")))
         #svo.date = date.fromisoformat(data[1])
         svo.analyze = bool(data[4])
         return svo
