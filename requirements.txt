@@ -5,3 +5,4 @@ pyqt5
 pyqt5-tools
 matplotlib
 fpdf
+PyPDF2
