@@ -77,12 +77,14 @@ def color(item, channels):
     img[:,:] = np.matmul(item[:,:],rgb_matrix)
     return img
 
-def saveResult(save_path, output, channels, frame_number, cords) -> None:
+def saveResult(save_path, output, channels, frame_number, cords, right_views_path, right_views_marked_path) -> None:
     """
     Получает результаты предикта, собирает изображение из кусочков и сохраняет в 'save_path'
     """
     if not os.path.exists(save_path):
         os.makedirs(save_path)
+    if not os.path.exists(right_views_marked_path):
+        os.makedirs(right_views_marked_path)
     arr = []
     for item in output:
         img = color(item, channels)
@@ -90,9 +92,11 @@ def saveResult(save_path, output, channels, frame_number, cords) -> None:
         if len(arr)==15:
             img_save = probs_to_image(arr)
             img_save = img_save.astype(np.uint8)
-            img_save = cv2.circle(img_save, (cords[1], cords[0]), 20, (255, 0, 0), 2)
             io.imsave(os.path.join(save_path, f"{frame_number}.png"), img_save)
             arr.clear()
+    img_right = cv2.imread(os.path.join(right_views_path, f"{frame_number}.png"))
+    img_right = cv2.circle(img_right, (cords[1], cords[0]), 20, (255, 0, 0), 2)
+    io.imsave(os.path.join(right_views_marked_path, f"{frame_number}.png"), img_right)
 
 def save_to_json(object, filepath):
     json.dump(object, codecs.open(filepath, 'w'), separators=(',',':'))
