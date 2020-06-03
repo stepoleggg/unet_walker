@@ -133,18 +133,21 @@ def render_report(file_name):
 
     # сохранение таблиц с данными
     red_points = []
+    yellow_points = []
     tables_n = len(timestamps) // max_d_on_table
     if tables_n * max_d_on_table < len(timestamps):
         tables_n += 1
     if tables_n == 0:
         pdfs.append(f'{predict_path}\\{file_name}\\temp\\0.pdf')
-        save_table_n(file_name, timestamps, distances_average_per_sec, 0, red_points)
+        save_table_n(file_name, timestamps, distances_average_per_sec, 0, red_points, yellow_points)
     for i in range(tables_n):
         pdfs.append(f'{predict_path}\\{file_name}\\temp\\{i}.pdf')
         if i == tables_n - 1:
-            save_table_n(file_name, timestamps[i*max_d_on_table:], distances_average_per_sec[i*max_d_on_table:], i, red_points)
+            save_table_n(file_name, timestamps[i*max_d_on_table:], 
+                distances_average_per_sec[i*max_d_on_table:], i, red_points, yellow_points)
         else:
-            save_table_n(file_name, timestamps[i*max_d_on_table:(i+1)*max_d_on_table], distances_average_per_sec[i*max_d_on_table:(i+1)*max_d_on_table], i, red_points)
+            save_table_n(file_name, timestamps[i*max_d_on_table:(i+1)*max_d_on_table], 
+                distances_average_per_sec[i*max_d_on_table:(i+1)*max_d_on_table], i, red_points, yellow_points)
 
     # сохранение изображений с высокой ДКР
     photo_width = 190
@@ -165,6 +168,17 @@ def render_report(file_name):
             pdf.cell(0, 255, txt=f"Измерение {int(red_point['tid'] / average_frame_size) + 1}. Высота ДКР: {red_point['bush_height']} м. Время измерения: {red_point['time']}", ln=1, align="C")
             pdf.image(f'{predict_path}\\{file_name}\\right_marked\\{red_point["tid"]}.png', 10, 20 + dy, photo_width, photo_width/16*9)
         i += 1
+
+    pdf.add_page()
+    pdf.set_font("times-new-roman-bold", size=16)
+    pdf.cell(200, 10, txt=f"Итого", ln=1, align="C")
+    pdf.set_font("times-new-roman", size=14)
+    pdf.cell(230, 10, txt=f"Кадров проанализированно: {len(distances)}", ln=1, align="L")
+    pdf.cell(230, 10, txt=f"Расстояний рассчитанно: {len(distances_average_per_sec)}", ln=1, align="L")
+    ok_dist_len = len(distances_average_per_sec) - len(red_points)
+    pdf.cell(230, 10, txt=f"Допустимых расстояний: {ok_dist_len} ({round(ok_dist_len*100/len(distances_average_per_sec), 1)}%)", ln=1, align="L")
+    pdf.cell(230, 10, txt=f"Недопустимых расстояний: {len(red_points)} ({round(len(red_points)*100/len(distances_average_per_sec), 1)}%)", ln=1, align="L")
+    pdf.cell(230, 10, txt=f"Расстояний, меньших чем 120% от минимальной границы: {len(yellow_points)} ({round(len(yellow_points)*100/len(distances_average_per_sec), 1)}%)", ln=1, align="L")
     pdfs.append(f'{predict_path}\\{file_name}\\temp\\photos.pdf')
     pdf.output(f'{predict_path}\\{file_name}\\temp\\photos.pdf')
 
@@ -174,7 +188,7 @@ def render_report(file_name):
     merger.write(f'{predict_path}\\{file_name}\\report.pdf')
     merger.close()
 
-def save_table_n(file_name, timestamps, distances, n, red_points):
+def save_table_n(file_name, timestamps, distances, n, red_points, yellow_points):
     # таблица
     fig, ax = plt.subplots()
     fig_width_cm = 21                                # A4 page
@@ -200,6 +214,7 @@ def save_table_n(file_name, timestamps, distances, n, red_points):
             red_points.append({"tid": (n * max_d_on_table + i) * average_frame_size, "dist": round(distances[i], 2), "bush_height": bush_height, "time": time_str})
         elif bush_height > max_bush_height * 0.8:
             colors.append(["w", "w", "w", "yellow"])
+            yellow_points.append({"tid": (n * max_d_on_table + i) * average_frame_size})
         else:
             colors.append(["w", "w", "w", "w"])
         table_data.append([n*max_d_on_table + 1 + i, time_str, round(distances[i], 2), bush_height])

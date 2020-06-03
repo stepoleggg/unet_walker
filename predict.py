@@ -48,7 +48,7 @@ def predict(file_name, callback = None):
             coordinates.append(coordinate)
             probabilities.append(probability)
             print(f'{frame_number+1}/{frames_length} completed')
-            # сохранение распознанного кадра
+            # сохранение распознанного и помеченного кадров
             saveResult(mask_path, results, channels, frame_number, coordinate, right_views_path, right_views_marked_path)
         # сохранение результатов анализа
         analyzed_data = {'distances': distances, 'timestamps': timestamps, 'frame_numbers': frame_numbers, 'coordinates': coordinates, 'probabilities': probabilities}
