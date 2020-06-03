@@ -13,3 +13,9 @@ svo_dir = config['DEFAULT']['svo_dir']
 lap_height = float(config['DEFAULT']['lap_height'])
 max_d_on_table = int(config['DEFAULT']['max_d_on_table'])
 max_bush_height = float(config['DEFAULT']['max_bush_height'])
+
+def update_lap_bush(lap, bush):
+    config['DEFAULT']['lap_height'] = str(lap)
+    config['DEFAULT']['max_bush_height'] = str(bush)
+    with open('config.ini', 'w') as f:
+        config.write(f)

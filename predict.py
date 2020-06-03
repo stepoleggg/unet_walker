@@ -28,10 +28,18 @@ def predict(file_name, callback = None):
 
     if not os.path.exists(weights_path):
         print(f"Файл весов {weights_path} не существует!")
+    if not os.path.exists(right_views_marked_path):
+        os.makedirs(right_views_marked_path)
+    if not os.path.exists(right_measures_path):
+        os.makedirs(right_measures_path)
+    if not os.path.exists(mask_path):
+        os.makedirs(mask_path)
+
     else:
         frames_length = len(os.listdir(right_views_path))
         model = unet(len(channels), pretrained_weights = weights_path)
         testGene = testGenerator(right_views_path)
+        proc, dif = float(frames_length) / 10
         for frame_number in range(frames_length):
             pred = []
             if callback is not None:
@@ -48,6 +56,10 @@ def predict(file_name, callback = None):
             coordinates.append(coordinate)
             probabilities.append(probability)
             print(f'{frame_number+1}/{frames_length} completed')
+            if callback:
+                if float(frame_number)/frames_length >= proc:
+                    proc += dif
+                    callback.emit(f"{int(proc)*100}% готово")
             # сохранение распознанного и помеченного кадров
             saveResult(mask_path, results, channels, frame_number, coordinate, right_views_path, right_views_marked_path)
         # сохранение результатов анализа

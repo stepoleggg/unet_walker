@@ -187,6 +187,7 @@ def render_report(file_name):
         merger.append(pdf)
     merger.write(f'{predict_path}\\{file_name}\\report.pdf')
     merger.close()
+    return f'{predict_path}\\{file_name}\\report.pdf'
 
 def save_table_n(file_name, timestamps, distances, n, red_points, yellow_points):
     # таблица

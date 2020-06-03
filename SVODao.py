@@ -24,7 +24,14 @@ class Svo_DB:
 
     @staticmethod
     def update_svo(svo: Svo_file):    
-        Svo_DB.execute(f"UPDATE {db_name} SET svo_name=?, svo_date=?, get_data=?, predict=?, analyze=?", svo.get_data_for_insert())
+        Svo_DB.execute(f"UPDATE {db_name} SET svo_date=?, get_data=?, predict=?, analyze=? where svo_name=?", svo.get_data_for_insert()[1:] + [svo.file_name])
+
+    @staticmethod
+    def get_svo_by_name(svo: Svo_file) -> Svo_file:
+        res = Svo_DB.execute(f"SELECT * from {db_name} WHERE svo_name = ?", [svo.file_name])
+        if res:
+            return Svo_file.from_query(res[0])
+        return None
 
     @staticmethod
     def get_all_svo():

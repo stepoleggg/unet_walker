@@ -5,10 +5,11 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from interface.ui_template import Ui_mainWindow
+from interface.dialog_ui_template import Ui_Dialog
 import train
 import read_svo
 import predict
-from config import data_dir, db_name, svo_dir
+from config import data_dir, db_name, svo_dir, update_lap_bush
 from typing import List
 from CapturedText import captured
 import time
@@ -19,6 +20,7 @@ from interface.TableModel import TableModel
 
 from svo_file import Svo_file
 from SVODao import Svo_DB
+from analyzer import render_report
 
 class App(QMainWindow, Ui_mainWindow):
     def __init__(self):
@@ -26,12 +28,13 @@ class App(QMainWindow, Ui_mainWindow):
         self.setupUi(self)
         # init var
         self.svo_files: List[Svo_file] = []
-        self.svo_files_db: List[Svo_file] = []
         # init func
         self.choseFileButton.clicked.connect(self.file_dialog)
         self.predictButton.clicked.connect(self.predict)
         self.getDataButton.clicked.connect(self.get_data)
         self.clearButton.clicked.connect(self.clear_table)
+        self.analyzeButton.clicked.connect(self.analyze)
+        self.editButton.clicked.connect(self.dialog)
         # init list view
         #self.add_data_to_list_view("Выберите SVO файл")
         # init multitrading 
@@ -39,14 +42,48 @@ class App(QMainWindow, Ui_mainWindow):
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
         # init db 
-        self.update_db()
         self.update_table()
+        for svo in Svo_DB.get_all_svo():
+            print(svo)
+            svo.get_data = True
+            Svo_DB.update_svo(svo)
+
+    def dialog(self):
+        self.dia = Dialog(self)
+        self.dia.show()
+
 
     def clear_table(self):
         self.svo_files = []
         self.update_table()
-        self.update_db()
+        self.listWidget.clear()
+        
+    def analyze(self):
+        worker = Worker(self._analyze)
+        worker.signals.result.connect(self.print_output)
+        worker.signals.finished.connect(self.thread_complete)
+        worker.signals.progress.connect(self.progress_fn)
+        self.threadpool.start(worker)  
 
+    def _analyze(self, progress_callback):
+        if self.current_svo_error():
+            for file in self.svo_files:
+                if not file.get_data:
+                    if read_svo.read_svo(file.svo_path, progress_callback) == "ok":
+                       file.get_data = True
+                       Svo_DB.update_svo(file)
+                       self.update_table()
+                    else:
+                        continue
+                if not file.predict:
+                    if predict.predict(file.svo_dir_name, progress_callback) == "ok":
+                        file.predict = True
+                        Svo_DB.update_svo(file)
+                        self.update_table()
+            self.add_data_to_list_view(f"Создание отчета для {file.file_name}")
+            out = render_report(file.svo_dir_name)
+            self.add_data_to_list_view(f"Отчет создан и сохранен {out}")
+        return "ok"
 
     def update_table(self):
         data = []
@@ -57,9 +94,6 @@ class App(QMainWindow, Ui_mainWindow):
         self.tableModel = TableModel(data)
         self.tableView.setModel(self.tableModel)
 
-    def update_db(self):
-        for m in Svo_DB.get_all_svo():
-            self.svo_files_db.append(m)
 
     def progress_fn(self, n):
         self.add_data_to_list_view(n)
@@ -97,14 +131,14 @@ class App(QMainWindow, Ui_mainWindow):
                     if read_svo.read_svo(file.svo_path, progress_callback) == "ok":
                        file.get_data = True
                        Svo_DB.update_svo(file)
-                       self.update_db()
+                       self.update_table()
                     else:
                         continue
                 if predict.predict(file.svo_dir_name, progress_callback) == "ok":
                     file.predict = True
                     Svo_DB.update_svo(file)
-                    self.update_db()
-            self.update_table()
+                    self.update_table()
+        return "ok"
 
     def get_data(self):
         if self.current_svo_error():
@@ -120,8 +154,7 @@ class App(QMainWindow, Ui_mainWindow):
                 if read_svo.read_svo(file.svo_path, progress_callback) == "ok":
                     file.get_data = True
                     Svo_DB.update_svo(file)
-                    self.update_db()
-        self.update_table()
+                    self.update_table()
         return "ok"
  
     def current_svo_error(self) -> bool:
@@ -139,8 +172,8 @@ class App(QMainWindow, Ui_mainWindow):
         else:
             self.show_info_widget("SVO файл добавлен", f"{path}")
         
-        svo, u = Svo_file.is_unique(self.svo_files_db, Svo_file(path))
-        if u:
+        svo = Svo_DB.get_svo_by_name(Svo_file(path))
+        if not svo:
             if PurePath(path).parent != PurePath(svo_dir):
                 shutil.copy(path, svo_dir)
             svo_file = Svo_file(path)
@@ -173,11 +206,34 @@ class App(QMainWindow, Ui_mainWindow):
         msg.setWindowTitle(title)
         msg.exec()
 
+class Dialog(QMainWindow, Ui_Dialog):
+    def __init__(self, app: App):
+        super().__init__()
+        self.setupUi(self)
+        self.app = app
+
+    def accept(self):
+        if self.change_config() == "ok":
+            self.destroy()
+    def reject(self):
+        self.destroy()
+
+    def change_config(self):
+        try:
+            update_lap_bush(float(self.lineEdit.text()), float(self.lineEdit_2.text()))
+        except Exception as e:
+            self.app.show_error_widget("Неприемлемое значение")
+            print(e)
+            return
+        return "ok"
+
+
 def main():
     app = QApplication(sys.argv)  # Новый экземпляр QApplication
     window = App() 
     window.show()  
     app.exec_()
+
 
 class WorkerSignals(QObject):
     '''
