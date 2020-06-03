@@ -31,7 +31,7 @@ def main(filepath, callback = None):
     print(filepath)
     print(file_name)
     filepath = data_dir + "\\" + file_name
-
+    print(filepath)
     if not os.path.exists(f'{filepath}\\right'):
         os.makedirs(f'{filepath}\\right')
     if not os.path.exists(f'{filepath}\\right_measure'):
@@ -46,12 +46,15 @@ def main(filepath, callback = None):
             cam.retrieve_measure(right_measure, sl.MEASURE.DEPTH_RIGHT)
             # Время
             time = cam.get_timestamp(sl.TIME_REFERENCE.IMAGE)
+            print(right.get_step())
+            print(right.get_step_bytes())
             # Сохранение изображения
             right.write(f'{filepath}\\right\\{i}.png')
             # Сохранение измерений глубины и времени
             data = {'time': time.get_milliseconds(), 'measures': right_measure.get_data().tolist()}
             save_to_json(data, f'{filepath}\\right_measure\\{i}.json')
         else:
+            print("lox")
             print(repr(err))
             break
         i+=1
